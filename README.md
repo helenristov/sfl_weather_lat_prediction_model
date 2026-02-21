@@ -1,3 +1,4 @@
+
 # Weather Station Latitude Prediction
 ### SFL Scientific (a Deloitte business) — Data Scientist Take-Home Challenge
 
@@ -28,7 +29,9 @@ Weather stations in the post-2020 dataset had their latitude values corrupted to
 
 ## Quickstart (Docker)
 
-Requires **bash** and **Docker** to be installed.
+### Mac / Linux
+
+Requires **bash** and **Docker Desktop** (or Docker Engine on Linux).
 
 ```bash
 # 1. Place PS1 station files in ./data/PS1/
@@ -39,22 +42,111 @@ bash run.sh
 
 On completion, `prediction_results.csv` will be written to the current directory.
 
-### Optional arguments
-
+**Optional — custom paths:**
 ```bash
 bash run.sh --ps1 /path/to/PS1 --ps2 /path/to/PS2 --output my_results.csv
 ```
 
 ---
 
+### Windows
+
+Requires **Docker Desktop for Windows** (download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)). During installation, enable **"Use WSL 2 based engine"** when prompted. Open Docker Desktop and wait for **"Engine running"** in the bottom left before proceeding.
+
+Windows does not support `run.sh` natively, so run the pipeline directly with `docker run`.
+
+**Step 1 — Create data folders** (PowerShell):
+```powershell
+mkdir data\PS1
+mkdir data\PS2
+```
+Copy your CSV station files into `data\PS1\` and `data\PS2\` respectively.
+
+**Step 2 — Build the Docker image** (only needed once):
+```powershell
+docker build -t sfl_latitude_prediction .
+```
+
+**Step 3 — Run the pipeline:**
+
+*PowerShell:*
+```powershell
+docker run --rm `
+  -v "${PWD}\data\PS1:/app/data/PS1" `
+  -v "${PWD}\data\PS2:/app/data/PS2" `
+  -v "${PWD}:/app/output" `
+  sfl_latitude_prediction `
+  python run_pipeline.py `
+    --ps1 /app/data/PS1 `
+    --ps2 /app/data/PS2 `
+    --output /app/output/prediction_results.csv
+```
+
+*Command Prompt (cmd.exe):*
+```cmd
+docker run --rm ^
+  -v "%CD%\data\PS1:/app/data/PS1" ^
+  -v "%CD%\data\PS2:/app/data/PS2" ^
+  -v "%CD%:/app/output" ^
+  sfl_latitude_prediction ^
+  python run_pipeline.py ^
+    --ps1 /app/data/PS1 ^
+    --ps2 /app/data/PS2 ^
+    --output /app/output/prediction_results.csv
+```
+
+> **Note:** Inside the container, paths always use forward slashes `/` even on Windows. The backtick `` ` `` is PowerShell's line continuation character; `^` is the equivalent in Command Prompt.
+
+On completion, `prediction_results.csv` will appear in your project folder. Preview it with:
+```powershell
+Get-Content prediction_results.csv
+```
+
+**Optional — custom data paths (PowerShell):**
+```powershell
+docker run --rm `
+  -v "C:\Users\YourName\Desktop\PS1_data:/app/data/PS1" `
+  -v "C:\Users\YourName\Desktop\PS2_data:/app/data/PS2" `
+  -v "${PWD}:/app/output" `
+  sfl_latitude_prediction `
+  python run_pipeline.py --ps1 /app/data/PS1 --ps2 /app/data/PS2 --output /app/output/prediction_results.csv
+```
+
+---
+
+### Windows Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `docker: command not found` | Docker Desktop isn't running — open it from the Start menu and wait for the engine to start |
+| `Drive has not been shared` | Docker Desktop → Settings → Resources → File Sharing → add your drive (e.g. `C:\`) |
+| `invalid reference format` | Check for extra spaces in the `-v` volume path arguments |
+| `No CSV files found in PS1` | Confirm CSV files are directly inside `data\PS1\`, not in a subfolder |
+| Container exits with no output | Remove `--rm`, re-run, then check logs: `docker logs <container_id>` |
+| WSL 2 not installed | Open PowerShell as Administrator and run `wsl --install`, then restart your PC |
+| Slow first run | Normal — Docker is downloading the base Python image (~150 MB). Subsequent runs are fast. |
+
+---
+
 ## Quickstart (Local Python)
 
+**Mac / Linux:**
 ```bash
 pip install -r requirements.txt
 
 python run_pipeline.py \
     --ps1 ./data/PS1 \
     --ps2 ./data/PS2 \
+    --output prediction_results.csv
+```
+
+**Windows (PowerShell):**
+```powershell
+pip install -r requirements.txt
+
+python run_pipeline.py `
+    --ps1 .\data\PS1 `
+    --ps2 .\data\PS2 `
     --output prediction_results.csv
 ```
 
@@ -150,3 +242,4 @@ PS2 stations that are geographically novel (outside the PS1 region) are flagged 
 - Mahalanobis, P.C. (1936). *On the generalised distance in statistics*. Proceedings of the National Institute of Sciences of India.
 - Liu, F.T., Ting, K.M., Zhou, Z-H. (2008). *Isolation Forest*. IEEE ICDM 2008.
 - INMET — Instituto Nacional de Meteorologia (Brazilian weather station data source).
+- Claude and ChatGPT for Coding and Documentation Aids
