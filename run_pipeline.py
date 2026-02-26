@@ -1,7 +1,6 @@
 """
 run_pipeline.py
-───────────────
-SFL Scientific Take-Home Challenge
+──────────────
 Weather Station Latitude Prediction Pipeline
 
 This script replicates the full notebook logic as a standalone executable so
