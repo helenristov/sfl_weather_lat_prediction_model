@@ -1,6 +1,6 @@
 
 # Weather Station Latitude Prediction
-### SFL Scientific (a Deloitte business) — Data Scientist Take-Home Challenge
+
 
 ---
 
